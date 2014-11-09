@@ -1,12 +1,17 @@
 package com.lelexx.ormlitemanager.database;
 
-public class OrderClosure {
+/**
+ * OrderBySort allow you to create orderby condition easily.
+ *
+ * @author lelexxx <rruiz.alex@gmail.com>, french developper
+ */
+public class OrderBySort {
 
     private String mField;
 
     private boolean mIsAscending;
 
-    public OrderClosure(String field, boolean isAscending) {
+    public OrderBySort(String field, boolean isAscending) {
         this.mField = field;
         this.mIsAscending = isAscending;
     }
