@@ -27,9 +27,13 @@ public class WhereCondition {
         public static final int LIKE = 3;
 
         public static final int NOTLIKE = 4;
+		
+		public static final int GREATER = 5;
+		
+		public static final int LOWER = 6;
 
         private static boolean isAvailable(int compare){
-            return compare == EQUAL || compare == NOTEQUAL || compare == LIKE || compare == NOTLIKE;
+            return compare == EQUAL || compare == NOTEQUAL || compare == LIKE || compare == NOTLIKE || compare == GREATER || compare == LOWER;
         }
     }
 

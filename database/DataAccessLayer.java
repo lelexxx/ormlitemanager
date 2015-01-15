@@ -322,15 +322,27 @@ public class DataAccessLayer extends SQLiteOpenHelper {
         switch (where.getCompare()){
             case Compare.EQUAL :
                 query.where().eq(where.getColumn(), where.getValue());
+				break;
             case Compare.NOTEQUAL :
                 query.where().not().eq(where.getColumn(), where.getValue());
+				break;
             case Compare.LIKE :
                 query.where().like(where.getColumn(), where.getValue());
+				break;
             case Compare.NOTLIKE :
                 query.where().not().like(where.getColumn(), where.getValue());
+				break;
+			case Compare.GREATER :
+                query.where().gt(where.getColumn(), where.getValue());
+				break;
+			case Compare.LOWER :
+                query.where().lt(where.getColumn(), where.getValue());
+				break;
             default :
                 return query;
         }
+		
+		return query;
     }
 
     //endregion
