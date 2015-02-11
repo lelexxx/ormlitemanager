@@ -7,13 +7,13 @@ Features
 ========
 
 	- Create, insert, select, update, delete objects
-	- Manage EQUAL, NOTEQUAL, LIKE, NOTLIKE operators in conditions (WHERE statement)
+	- Use EQUAL, NOTEQUAL, LIKE, NOTLIKE operators in conditions (WHERE statement)
+	- Use AND, OR operators to select datas
 	
 TO-DO
 =====
 
-	- Methods could use List<WhereCondition>
-	- Use "AND" and "OR" operators into conditions (WHERE statement)  
+	- Methods could use List<WhereCondition> 
 	- Normalize comments
 
 How to install

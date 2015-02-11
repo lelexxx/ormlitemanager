@@ -10,7 +10,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.StatementBuilder;
+import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -147,7 +147,7 @@ public class DataAccessLayer extends SQLiteOpenHelper {
      *
      * @return A List of T objects
      */
-    public <T> List<T> selectDatas(final Class<T> pClass, final WhereCondition where, final OrderBySort orderBy, final long limit) {
+    public <T> List<T> selectDatas(final Class<T> pClass, final List<WhereCondition> where, final OrderBySort orderBy, final long limit) {
         List<T> ret = null;
         ConnectionSource connectionSource = new AndroidConnectionSource(this);
         try {
@@ -156,8 +156,14 @@ public class DataAccessLayer extends SQLiteOpenHelper {
             if (dao != null) {
                 QueryBuilder<T, Integer> queryBuilder = dao.queryBuilder();
 
-                if (where != null && where.getColumn() != null && !where.getColumn().isEmpty()) {
-                    queryBuilder = (QueryBuilder<T, Integer>) buildJunction(queryBuilder, where);
+                if (where != null && where.size() > 0){
+                    Where<T, Integer> whereClosure = queryBuilder.where();
+                    for(WhereCondition w : where) {
+                        if (w.getColumn() != null && !w.getColumn().isEmpty()) {
+                            whereClosure = buildJunction(whereClosure, w);
+                        }
+                    }
+                    queryBuilder.setWhere(whereClosure);
                 }
 
                 if (orderBy != null)
@@ -262,7 +268,9 @@ public class DataAccessLayer extends SQLiteOpenHelper {
                 DeleteBuilder<T, Integer> deleteBuilder = dao.deleteBuilder();
 
                 if (where != null && where.getColumn() != null) {
-                    deleteBuilder = (DeleteBuilder<T, Integer>) buildJunction(deleteBuilder, where);
+                    Where<T, Integer> whereClosure = deleteBuilder.where();
+                    whereClosure = buildJunction(whereClosure, where);
+                    deleteBuilder.setWhere(whereClosure);
                 }
 
                 ret = deleteBuilder.delete();
@@ -287,62 +295,64 @@ public class DataAccessLayer extends SQLiteOpenHelper {
 
     /** Add where condition depending on the {@link Junction}
      *
-     * @param query Initial query
-     * @param where
+     * @param whereClosure Where statement
+     * @param where Where description
      *
      * @return QueryBuilder with where condition
      *
-     * @throws SQLException
+     * @throws java.sql.SQLException
      */
-    private <T> StatementBuilder<T, Integer> buildJunction(StatementBuilder<T, Integer> query, WhereCondition where) throws SQLException {
+    private <T> Where<T, Integer> buildJunction(Where<T, Integer> whereClosure, WhereCondition where) throws SQLException {
         switch (where.getJunction()){
             case Junction.AND :
-                query.where().and();
-                query = buildCompare(query, where);
+                if(!whereClosure.toString().equals("empty where clause"))
+                    whereClosure.and();
+                whereClosure = buildCompare(whereClosure, where);
                 break;
             case Junction.OR :
-                query.where().or();
-                query = buildCompare(query, where);
+                if(!whereClosure.toString().equals("empty where clause"))
+                    whereClosure.or();
+                whereClosure = buildCompare(whereClosure, where);
                 break;
         }
 
-        return query;
+        return whereClosure;
     }
 
     /** Add where condition depending on the {@link Compare}
      *
-     * @param query Initial query
+     * @param whereClosure Where statement
      * @param where Where condition object
      *
      * @return QueryBuilder with where condition
      *
-     * @throws SQLException
+     * @throws java.sql.SQLException
      */
-    private <T> StatementBuilder<T, Integer> buildCompare(StatementBuilder<T, Integer> query, WhereCondition where) throws SQLException {
+    private <T> Where<T, Integer> buildCompare(Where<T, Integer> whereClosure, WhereCondition where) throws SQLException{
         switch (where.getCompare()){
             case Compare.EQUAL :
-                query.where().eq(where.getColumn(), where.getValue());
-				break;
+                whereClosure.eq(where.getColumn(), where.getValue());
+                break;
             case Compare.NOTEQUAL :
-                query.where().not().eq(where.getColumn(), where.getValue());
-				break;
+                whereClosure.not().eq(where.getColumn(), where.getValue());
+                break;
             case Compare.LIKE :
-                query.where().like(where.getColumn(), where.getValue());
-				break;
+                whereClosure.like(where.getColumn(), where.getValue());
+                break;
             case Compare.NOTLIKE :
-                query.where().not().like(where.getColumn(), where.getValue());
-				break;
-			case Compare.GREATER :
-                query.where().gt(where.getColumn(), where.getValue());
-				break;
-			case Compare.LOWER :
-                query.where().lt(where.getColumn(), where.getValue());
-				break;
+                whereClosure.not().like(where.getColumn(), where.getValue());
+                break;
+            case Compare.GREATER :
+                whereClosure.gt(where.getColumn(), where.getValue());
+                break;
+            case Compare.LOWER :
+                whereClosure.lt(where.getColumn(), where.getValue());
+                break;
             default :
-                return query;
+                return whereClosure;
         }
-		
-		return query;
+
+        return whereClosure;
     }
 
     //endregion
