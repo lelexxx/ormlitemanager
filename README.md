@@ -25,3 +25,8 @@ Add as library the 2 jars.
 Copy and paste "database" folder in your project.
 Modify package name and import in order to correspond to your project.
 In "DataAccessLayer.java" file, Modify "DATABASE_NAME" and "DATABASE_VERSION" member values.
+
+SEE
+===
+
+OrmLiteMamanger use ormlite library : http://ormlite.com/
